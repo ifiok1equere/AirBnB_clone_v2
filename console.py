@@ -140,8 +140,7 @@ class HBNBCommand(cmd.Cmd):
                     # remove any single or double quotes in the value
                     if "'" in value or '"' in value:
                         value = value.replace('"', '').replace("'", "")
-
-                    # Replace space with underscore and any quote within the value
+                    # Replace '_' with ' ' and any quote within the value
                     if "_" in value:
                         value = value.replace("_", " ")
                 else:
@@ -154,7 +153,7 @@ class HBNBCommand(cmd.Cmd):
 
                 # Add the key-value pair to the dictionary
                 param_dict[key] = value
-        
+
         new_instance = HBNBCommand.classes[command]()
         if param_dict is not None:
             new_instance.__dict__.update(param_dict)
@@ -355,6 +354,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
