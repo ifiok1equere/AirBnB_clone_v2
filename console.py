@@ -149,6 +149,8 @@ class HBNBCommand(cmd.Cmd):
                         value = int(value)
                     except ValueError:
                         value = float(value)
+                    except ValueError:
+                        continue
 
                 # Add the key-value pair to the dictionary
                 param_dict[key] = value
