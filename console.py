@@ -136,7 +136,6 @@ class HBNBCommand(cmd.Cmd):
                 if value.startswith('"'):
                     # Remove any surrounding quotes from the value
                     value = value.strip('"')
-
                     # remove any single or double quotes in the value
                     if "'" in value or '"' in value:
                         value = value.replace('"', '').replace("'", "")
