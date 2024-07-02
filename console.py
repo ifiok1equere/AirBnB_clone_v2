@@ -2,7 +2,7 @@
 """ Console Module """
 import cmd
 import sys
-import shlex
+import re
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -120,7 +120,7 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
             return
 
-        arg = shlex.split(args)
+        arg = re.findall(r'\S+=".*?"|\S+', args)
         command = arg[0]
 
         if command not in HBNBCommand.classes:
@@ -133,24 +133,22 @@ class HBNBCommand(cmd.Cmd):
             for param in parameters:
                 # Split by the first occurrence of '='
                 key, value = param.split('=', 1)
+                if value.startswith('"'):
+                    # Remove any surrounding quotes from the value
+                    value = value.strip('"')
 
-                # Remove any surrounding quotes from the value
-                value = value.strip('"')
+                    # remove any single or double quotes in the value
+                    if "'" in value or '"' in value:
+                        value = value.replace('"', '').replace("'", "")
 
-                # remove any single or double quotes in the value
-                if "'" in value or '"' in value:
-                    value = value.replace('"', '').replace("'", "")
-
-                try:
-                    value = int(value)
-                except ValueError:
+                    # Replace space with underscore and any quote within the value
+                    if "_" in value:
+                        value = value.replace("_", " ")
+                else:
                     try:
-                        value = float(value)
+                        value = int(value)
                     except ValueError:
-
-                        # Replace space with underscore and any quote within the value
-                        if " " in value:
-                            value = value.replace(" ", "_")
+                        value = float(value)
 
                 # Add the key-value pair to the dictionary
                 param_dict[key] = value
