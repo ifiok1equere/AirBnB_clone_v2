@@ -2,6 +2,7 @@
 """ Console Module """
 import cmd
 import sys
+import shlex
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -73,7 +74,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] == '{' and pline[-1] == '}'\
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -118,10 +119,45 @@ class HBNBCommand(cmd.Cmd):
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+
+        arg = shlex.split(args)
+        command = arg[0]
+
+        if command not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
+
+        parameters = arg[1:]
+        if parameters is not None:
+            param_dict = {}
+            for param in parameters:
+                # Split by the first occurrence of '='
+                key, value = param.split('=', 1)
+
+                # Remove any surrounding quotes from the value
+                value = value.strip('"')
+
+                # remove any single or double quotes in the value
+                if "'" in value or '"' in value:
+                    value = value.replace('"', '').replace("'", "")
+
+                try:
+                    value = int(value)
+                except ValueError:
+                    try:
+                        value = float(value)
+                    except ValueError:
+
+                        # Replace space with underscore and any quote within the value
+                        if " " in value:
+                            value = value.replace(" ", "_")
+
+                # Add the key-value pair to the dictionary
+                param_dict[key] = value
+        
+        new_instance = HBNBCommand.classes[command]()
+        if param_dict is not None:
+            new_instance.__dict__.update(param_dict)
         storage.save()
         print(new_instance.id)
         storage.save()
@@ -272,7 +308,7 @@ class HBNBCommand(cmd.Cmd):
                 args.append(v)
         else:  # isolate args
             args = args[2]
-            if args and args[0] is '\"':  # check for quoted arg
+            if args and args[0] == '\"':  # check for quoted arg
                 second_quote = args.find('\"', 1)
                 att_name = args[1:second_quote]
                 args = args[second_quote + 1:]
@@ -280,10 +316,10 @@ class HBNBCommand(cmd.Cmd):
             args = args.partition(' ')
 
             # if att_name was not quoted arg
-            if not att_name and args[0] is not ' ':
+            if not att_name and args[0] != ' ':
                 att_name = args[0]
             # check for quoted val arg
-            if args[2] and args[2][0] is '\"':
+            if args[2] and args[2][0] == '\"':
                 att_val = args[2][1:args[2].find('\"', 1)]
 
             # if att_val was not quoted arg
